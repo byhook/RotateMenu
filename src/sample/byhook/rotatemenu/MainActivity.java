@@ -4,6 +4,8 @@ import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -36,23 +38,33 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		initView();
+		initData();
+	}
 
+	private void initView(){
 		rotateMenu = (RotateMenu) findViewById(R.id.rotateMenu);
+	}
 
+	private void initData(){
 		List<RotateItemBean> items = new ArrayList<RotateItemBean>();
-		for(int i=0;i<5;i++){
-			items.add(new RotateItemBean());
-		}
+
+		List<ApplicationInfo> infos = getPackageManager().getInstalledApplications(0);
+		RotateItemBean bean = null;
+		ApplicationInfo info;
+
+		int pages = infos.size()/9;
+		if(pages<3)
+			return ;
 
 		mPages = new RotateGroup[]{new RotateGroup(this),new RotateGroup(this),new RotateGroup(this)};
-		BaseItemAdapter middleItemAdapter = new BaseItemAdapter(this,items);
-		BaseItemAdapter rightItemAdapter = new BaseItemAdapter(this,items);
-		BaseItemAdapter downItemAdapter = new BaseItemAdapter(this,items);
+		BaseItemAdapter middleItemAdapter = new BaseItemAdapter(this,infos.subList(0,9));
+		BaseItemAdapter rightItemAdapter = new BaseItemAdapter(this,infos.subList(9,18));
+		BaseItemAdapter downItemAdapter = new BaseItemAdapter(this,infos.subList(18,27));
 
 		mPages[0].setItemAdapter(RotateGroup.CenterType.RIGHT_BOTTOM,middleItemAdapter);
 		mPages[1].setItemAdapter(RotateGroup.CenterType.LEFT_BOTTOM,rightItemAdapter);
 		mPages[2].setItemAdapter(RotateGroup.CenterType.RIGHT_TOP,downItemAdapter);
-		mPages[0].setBackgroundColor(Color.YELLOW);
 
 		PageAdapter adapter = new PageAdapter(mPages);
 		rotateMenu.setPageAdapter(adapter);

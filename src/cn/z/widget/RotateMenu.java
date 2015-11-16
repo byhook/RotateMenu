@@ -106,13 +106,6 @@ public class RotateMenu extends ViewGroup{
         mPageDown.setPivotX(720);
         mPageDown.setPivotY(0);
 
-//        mPageMiddle.setPivotX(360);
-//        mPageMiddle.setPivotY(360);
-//        mPageRight.setPivotX(360);
-//        mPageRight.setPivotY(0);
-//        mPageDown.setPivotX(0);
-//        mPageDown.setPivotY(360);
-
         System.out.println("Pivot="+mPageMiddle.getPivotX()+"/"+mPageMiddle.getPivotY());
     }
 
@@ -131,19 +124,6 @@ public class RotateMenu extends ViewGroup{
         animSet.start();
     }
 
-    private float middleStartAngle = 0.0F;
-    private float middleEndAngle = -90.F;
-
-    private float rightStartAngle = 0.0F;
-    private float rightEndAngle = -90.F;
-
-    private float leftStartAngle = 0.0F;
-    private float leftEndAngle = -90.F;
-
-    private LinearLayout mRotationMiddle;
-    private LinearLayout mRotationRight;
-    private LinearLayout mRotationDown;
-
 
     public AnimatorSet getRotateMenu(int index){
 
@@ -151,16 +131,6 @@ public class RotateMenu extends ViewGroup{
         ObjectAnimator pageRight = ObjectAnimator.ofFloat(mPages[(index+1)%3], "rotation", mPages[(index+1)%3].getRotation(), mPages[(index+1)%3].getRotation()-90F);
         ObjectAnimator pageDown = ObjectAnimator.ofFloat(mPages[(index+2)%3], "rotation", mPages[(index+2)%3].getRotation(), mPages[(index+2)%3].getRotation()-180F);
 
-
-
-
-//        Keyframe kf0 = Keyframe.ofFloat(0.0F, 90.0F);
-//        Keyframe kf1 = Keyframe.ofFloat(90F, 0.0F);
-//        PropertyValuesHolder pvhRotation = PropertyValuesHolder.ofKeyframe("rotation", kf0, kf1);
-//
-//        ObjectAnimator pageMiddle = ObjectAnimator.ofPropertyValuesHolder(mPageMiddle, pvhRotation);
-
-        animSet.setDuration(1000);
         animSet.playTogether(pageMiddle, pageRight, pageDown);
         return animSet;
     }
@@ -170,34 +140,37 @@ public class RotateMenu extends ViewGroup{
     public void rotateMenu(){
         initPagePosition();
 
-        animSet = getRotateMenu(pageIndex++);
+        if(!animSet.isStarted()){
+            animSet = getRotateMenu(pageIndex++);
 
-        animSet.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animation) {
+            animSet.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animation) {
 
-            }
+                }
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                 if(mPageMiddle.getRotation()%360==0){
-                      for(ViewGroup layout:mPages){
-                          layout.setRotation(0);
-                          if (DEBUG) Log.d(TAG,"PAGE RESET");
-                      }
-                 }
-            }
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if(mPageMiddle.getRotation()%360==0){
+                        for(ViewGroup layout:mPages){
+                            layout.setRotation(0);
+                            if (DEBUG) Log.d(TAG,"PAGE RESET");
+                        }
+                    }
+                }
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
+                @Override
+                public void onAnimationCancel(Animator animation) {
 
-            }
+                }
 
-            @Override
-            public void onAnimationRepeat(Animator animation) {
+                @Override
+                public void onAnimationRepeat(Animator animation) {
 
-            }
-        });
-        animSet.start();
+                }
+            });
+            animSet.start();
+        }
+
     }
 }

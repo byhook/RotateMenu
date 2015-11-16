@@ -1,6 +1,8 @@
 package cn.z.widget;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -51,20 +53,28 @@ public class RotateGroup extends ViewGroup {
 
         if(DEBUG) Log.d(TAG,""+changed+"/"+l+"/"+t+"/"+r+"/"+b+"//"+diameter);
 
+        int k = 0;
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
+            int px,py;
+            if(i<4){
+                px = (int) ((diameter - mWidth)  * Math.cos(18 * (i + 1) * Math.PI / 180))-mWidth/2;
+                py = (int) ((diameter - mHeight)  * Math.sin(18 * (i + 1) * Math.PI / 180))-mHeight/2;
 
-            int px = (int) ((diameter - mWidth)  * Math.cos(15 * (i + 1) * Math.PI / 180))-mWidth/2;
-            int py = (int) ((diameter - mHeight)  * Math.sin(15 * (i + 1) * Math.PI / 180))-mHeight/2;
+                //child.layout(px-mWidth, py, px, py + mHeight);
 
 
-            //child.layout(px, py, px + mWidth, py + mHeight);
+            }else{
+                px = (int) (diameter  * Math.cos(15 * (k + 1) * Math.PI / 180));
+                py = (int) (diameter  * Math.sin(15 * (k + 1) * Math.PI / 180));
 
-            //child.layout(px-mWidth, diameter - py, px, diameter - py + mHeight);
+                //child.layout(px-mWidth, py, px, py + mHeight);
+                //child.layout(diameter - px , diameter - py, diameter - px + mWidth, diameter - py + mHeight);
+
+                k++;
+            }
+
             switch (mType){
-                case LEFT_TOP:
-                    child.layout(px, py, px + mWidth, py + mHeight);
-                    break;
                 case RIGHT_TOP:
                     child.layout(diameter - px, py-mHeight, diameter - px + mWidth, py);
                     break;
@@ -72,7 +82,7 @@ public class RotateGroup extends ViewGroup {
                     child.layout(px-mWidth, diameter - py, px, diameter - py + mHeight);
                     break;
                 case RIGHT_BOTTOM:
-                    child.layout(diameter - px, diameter - py, diameter - px + mWidth, diameter - py + mHeight);
+                    child.layout(diameter - px , diameter - py, diameter - px + mWidth, diameter - py + mHeight);
                     break;
             }
         }
