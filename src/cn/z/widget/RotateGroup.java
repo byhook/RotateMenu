@@ -56,21 +56,13 @@ public class RotateGroup extends ViewGroup {
         int k = 0;
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
-            int px,py;
+            int px=0,py=0;
             if(i<4){
                 px = (int) ((diameter - mWidth)  * Math.cos(18 * (i + 1) * Math.PI / 180))-mWidth/2;
                 py = (int) ((diameter - mHeight)  * Math.sin(18 * (i + 1) * Math.PI / 180))-mHeight/2;
-
-                //child.layout(px-mWidth, py, px, py + mHeight);
-
-
-            }else{
-                px = (int) (diameter  * Math.cos(15 * (k + 1) * Math.PI / 180));
-                py = (int) (diameter  * Math.sin(15 * (k + 1) * Math.PI / 180));
-
-                //child.layout(px-mWidth, py, px, py + mHeight);
-                //child.layout(diameter - px , diameter - py, diameter - px + mWidth, diameter - py + mHeight);
-
+            }else if(i<9){
+                px = (int) ((diameter - mWidth/2)  * Math.cos(15 * (k + 1) * Math.PI / 180));
+                py = (int) ((diameter - mWidth/2)  * Math.sin(15 * (k + 1) * Math.PI / 180));
                 k++;
             }
 

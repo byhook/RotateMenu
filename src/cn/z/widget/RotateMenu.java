@@ -8,6 +8,8 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
@@ -61,7 +63,10 @@ public class RotateMenu extends ViewGroup{
 
         mPageMiddle.layout(l, b-r, l + 720, b-r + 720);
         mPageRight.layout(l + 720, b-r, l + 720*2, b-r + 720);
-        mPageDown.layout(l, b-r + 720, l + 720, b-r + 720*2);
+        mPageDown.layout(l, b - r + 720, l + 720, b - r + 720 * 2);
+
+
+
     }
 
     @Override
@@ -73,6 +78,22 @@ public class RotateMenu extends ViewGroup{
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         setMeasuredDimension(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        canvas.drawColor(Color.parseColor("#50969696"));
+
+        Paint paint = new Paint();
+        paint.setStrokeWidth(360);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(Color.YELLOW);
+        //canvas.drawArc(new RectF(0,360,720,1080),-90,-90,false,paint);
+        canvas.drawCircle(720,1080,540,paint);
+
+        drawChild(canvas, mPageMiddle, 0);
+        drawChild(canvas, mPageRight,0);
+        drawChild(canvas, mPageDown,0);
     }
 
     /**
