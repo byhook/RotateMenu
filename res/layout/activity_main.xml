@@ -4,6 +4,28 @@
     android:layout_height="match_parent"
     tools:context="sample.byhook.rotatemenu.MainActivity">
 
+    <!--<cn.z.widget.RotateGroup-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_above="@+id/bt_bottom"-->
+        <!--android:background="#123456"-->
+        <!-->-->
+        <!--<Button-->
+            <!--android:layout_width="120dip"-->
+            <!--android:layout_height="120dip" />-->
+
+        <!--<Button-->
+            <!--android:layout_width="120dip"-->
+            <!--android:layout_height="120dip" />-->
+
+        <!--<Button-->
+            <!--android:layout_width="120dip"-->
+            <!--android:layout_height="120dip" />-->
+        <!--<Button-->
+            <!--android:layout_width="120dip"-->
+            <!--android:layout_height="120dip" />-->
+
+    <!--</cn.z.widget.RotateGroup>-->
 
     <cn.z.widget.RotateMenu
         android:id="@+id/rotateMenu"
@@ -13,25 +35,32 @@
         android:text="@string/hello_world"
         android:layout_above="@+id/bt_bottom"
         >
-        <!--<TextView-->
-            <!--android:id="@+id/middle"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="180dip"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="测试"-->
-            <!--android:gravity="center"-->
-            <!--android:background="#50123456"-->
-            <!--/>-->
+        <cn.z.widget.RotateGroup
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/bt_bottom"
+            android:background="#123456"
+            >
+            <Button
+                android:layout_width="120dip"
+                android:layout_height="120dip" />
 
-        <!--<TextView-->
-            <!--android:id="@+id/right"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="180dip"-->
-            <!--android:layout_weight="1"-->
-            <!--android:text="测试"-->
-            <!--android:gravity="center"-->
-            <!--android:background="#50369147"-->
-            <!--/>-->
+            <Button
+                android:layout_width="120dip"
+                android:layout_height="120dip" />
+
+            <Button
+                android:layout_width="120dip"
+                android:layout_height="120dip" />
+            <Button
+                android:layout_width="120dip"
+                android:layout_height="120dip" />
+
+            <Button
+                android:layout_width="120dip"
+                android:layout_height="120dip" />
+
+        </cn.z.widget.RotateGroup>
     </cn.z.widget.RotateMenu>
 
 
