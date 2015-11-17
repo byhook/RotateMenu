@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 /**
  * Created by byhook on 15-11-13.
@@ -20,7 +21,7 @@ import android.widget.Button;
  * 包含旋转ITEM
  * 子菜单选项
  */
-public class RotateMenu extends ViewGroup{
+public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickImpl {
 
     private static final boolean DEBUG = true;
     private static final String TAG = "RotateMenu";
@@ -37,7 +38,7 @@ public class RotateMenu extends ViewGroup{
     /**
      * 页面下标
      */
-    private int pageIndex = 0;
+    private int pageIndex = 2;
 
     private RotateTextMenu mRotateTextMenu;
 
@@ -64,10 +65,8 @@ public class RotateMenu extends ViewGroup{
         mPageRight.layout(l + mWidth, mHeight-mWidth, l + mWidth*2, mHeight);
         mPageDown.layout(l, mHeight, l + mWidth, mHeight+mWidth);
 
-
-        mRotateTextMenu.layout(l, mHeight-mWidth, l + mWidth, mHeight);
-
-        //topMenu.layout(r - 360, b - 270, r, b - 90);
+        //mRotateTextMenu.layout(l, mHeight-mWidth, l + mWidth, mHeight);
+        mRotateTextMenu.layout(r-320, b-320, r-320 + mWidth, b-320 + mWidth);
     }
 
     @Override
@@ -92,6 +91,11 @@ public class RotateMenu extends ViewGroup{
         paint.setColor(Color.parseColor("#50848095"));
         canvas.drawCircle(mWidth, mHeight, 520, paint);
 
+        Paint pt = new Paint();
+
+        pt.setColor(getResources().getColor(android.R.color.holo_blue_dark));
+        canvas.drawCircle(mWidth, mHeight, 360, pt);
+
         int count = getChildCount();
         for(int i=0;i<count;i++){
             View child = getChildAt(i);
@@ -107,30 +111,35 @@ public class RotateMenu extends ViewGroup{
      * 设置页面适配器
      * @param adapter
      */
-    public void setPageAdapter(BasePageAdapter adapter){
+    public boolean setPageAdapter(BasePageAdapter adapter){
+        if(null==adapter)
+            return false;
+//        int count = adapter.getCount();
+//        for(int i=0;i<count;i++){
+//            mPages[i] = adapter.getItem(i);
+//            addView(mPages[i]);
+//        }
 
-        mPageMiddle = adapter.getItem(0);
-        addView(mPageMiddle);
-        mPages[0] = mPageMiddle;
 
-        mPageRight = adapter.getItem(1);
-        addView(mPageRight);
-        mPages[1] = mPageRight;
+      mPageMiddle = adapter.getItem(0);
+      addView(mPageMiddle);
+      mPages[0] = mPageMiddle;
 
-        mPageDown = adapter.getItem(2);
-        addView(mPageDown);
-        mPages[2] = mPageDown;
+      mPageRight = adapter.getItem(1);
+      addView(mPageRight);
+      mPages[1] = mPageRight;
+
+      mPageDown = adapter.getItem(2);
+      addView(mPageDown);
+      mPages[2] = mPageDown;
 
 
         String[] titles = {"常用","打开","工具"};
         mRotateTextMenu = new RotateTextMenu(getContext());
         mRotateTextMenu.setTextAdapter(titles);
         addView(mRotateTextMenu);
-        mRotateTextMenu.setBackgroundColor(Color.parseColor("#50969696"));
-
-//        topMenu = new Button(getContext());
-//        addView(topMenu);
-//        topMenu.setRotation(45);
+        mRotateTextMenu.setOnItemClickListener(this);
+        return true;
     }
 
     /**
@@ -163,29 +172,32 @@ public class RotateMenu extends ViewGroup{
     }
 
 
+    /**
+     * 转轮旋转
+     * @param index
+     * @return
+     */
     public AnimatorSet getRotateMenu(int index){
-
-        ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(mPages[index%3], "rotation", mPages[index%3].getRotation(), mPages[index%3].getRotation()-90.0F);
-        ObjectAnimator pageRight = ObjectAnimator.ofFloat(mPages[(index+1)%3], "rotation", mPages[(index+1)%3].getRotation(), mPages[(index+1)%3].getRotation()-90F);
-        ObjectAnimator pageDown = ObjectAnimator.ofFloat(mPages[(index+2)%3], "rotation", mPages[(index+2)%3].getRotation(), mPages[(index+2)%3].getRotation()-180F);
-
-        animSet.playTogether(pageMiddle, pageRight, pageDown);
+        for(int i=0;i<mPages.length;i++){
+            ViewGroup page = mPages[i];
+            //90度或者180度
+            final float temp = i==(index%3)?180.0F:90.F;
+            ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(page, "rotation", page.getRotation(), page.getRotation()-temp);
+            animSet.play(pageMiddle);
+        }
         return animSet;
     }
 
-    private AnimatorSet getRotateText(){
-        AnimatorSet animatorSet = new AnimatorSet();
+    /**
+     * 设置当前页面
+     * @param index
+     */
+    public void setCurrentPage(int index){
 
-        topMenu.setPivotX(mWidth);
-        topMenu.setPivotY(mHeight);
-        ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(topMenu, "rotation", topMenu.getRotation(), topMenu.getRotation()+20.0F);
-
-        animatorSet.play(pageMiddle);
-        return animatorSet;
     }
 
     AnimatorSet animSet = new AnimatorSet();
-
+    private int index = 2;
     public void rotateMenu(){
         initPagePosition();
 
@@ -219,9 +231,12 @@ public class RotateMenu extends ViewGroup{
                 }
             });
             animSet.start();
-
-            mRotateTextMenu.rotateCursor();
+            mRotateTextMenu.rotateCursor(index++);
         }
+    }
 
+    @Override
+    public void onItemClick(View view, int index) {
+        Toast.makeText(getContext(), "Index="+index, Toast.LENGTH_SHORT).show();
     }
 }
