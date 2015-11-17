@@ -2,29 +2,23 @@ package cn.z.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
-import android.animation.Keyframe;
 import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Gravity;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 /**
  * Created by byhook on 15-11-13.
  * Mail : byhook@163.com
+ * 旋转菜单主界面
+ * 包含旋转ITEM
+ * 子菜单选项
  */
 public class RotateMenu extends ViewGroup{
 
@@ -45,6 +39,10 @@ public class RotateMenu extends ViewGroup{
      */
     private int pageIndex = 0;
 
+    private RotateTextMenu mRotateTextMenu;
+
+    private Button topMenu;
+
     public RotateMenu(Context context) {
         this(context,null);
     }
@@ -59,14 +57,17 @@ public class RotateMenu extends ViewGroup{
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (DEBUG) Log.d(TAG, "onLayout=" + changed + "/" + l + "/" + t + "/" + r + "/" + b+"//"+mWidth+"//"+mHeight);
 
-        mPageMiddle.layout(l, b-r, l + 720, b-r + 720);
-        mPageRight.layout(l + 720, b-r, l + 720*2, b-r + 720);
-        mPageDown.layout(l, b - r + 720, l + 720, b - r + 720 * 2);
+        if(DEBUG) Log.e(TAG, "" + changed + "/" + l + "/" + t + "/" + r + "/" + b + "//");
+
+        mPageMiddle.layout(l, mHeight-mWidth, l + mWidth, mHeight);
+        mPageRight.layout(l + mWidth, mHeight-mWidth, l + mWidth*2, mHeight);
+        mPageDown.layout(l, mHeight, l + mWidth, mHeight+mWidth);
 
 
+        mRotateTextMenu.layout(l, mHeight-mWidth, l + mWidth, mHeight);
 
+        //topMenu.layout(r - 360, b - 270, r, b - 90);
     }
 
     @Override
@@ -82,18 +83,24 @@ public class RotateMenu extends ViewGroup{
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
-        canvas.drawColor(Color.parseColor("#50969696"));
-
         Paint paint = new Paint();
         paint.setStrokeWidth(360);
+        paint.setAntiAlias(true);
+        paint.setStrokeJoin(Paint.Join.ROUND);
+        paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.YELLOW);
-        //canvas.drawArc(new RectF(0,360,720,1080),-90,-90,false,paint);
-        canvas.drawCircle(720,1080,540,paint);
+        paint.setColor(Color.parseColor("#50848095"));
+        canvas.drawCircle(mWidth, mHeight, 520, paint);
 
-        drawChild(canvas, mPageMiddle, 0);
-        drawChild(canvas, mPageRight,0);
-        drawChild(canvas, mPageDown,0);
+        int count = getChildCount();
+        for(int i=0;i<count;i++){
+            View child = getChildAt(i);
+            drawChild(canvas, child, 0);
+        }
+//        drawChild(canvas, mPageMiddle, 0);
+//        drawChild(canvas, mPageRight,0);
+//        drawChild(canvas, mPageDown,0);
+//        drawChild(canvas, mRotateTextMenu,0);
     }
 
     /**
@@ -114,6 +121,16 @@ public class RotateMenu extends ViewGroup{
         addView(mPageDown);
         mPages[2] = mPageDown;
 
+
+        String[] titles = {"常用","打开","工具"};
+        mRotateTextMenu = new RotateTextMenu(getContext());
+        mRotateTextMenu.setTextAdapter(titles);
+        addView(mRotateTextMenu);
+        mRotateTextMenu.setBackgroundColor(Color.parseColor("#50969696"));
+
+//        topMenu = new Button(getContext());
+//        addView(topMenu);
+//        topMenu.setRotation(45);
     }
 
     /**
@@ -127,7 +144,7 @@ public class RotateMenu extends ViewGroup{
         mPageDown.setPivotX(720);
         mPageDown.setPivotY(0);
 
-        System.out.println("Pivot="+mPageMiddle.getPivotX()+"/"+mPageMiddle.getPivotY());
+        System.out.println("Pivot=" + mPageMiddle.getPivotX() + "/" + mPageMiddle.getPivotY());
     }
 
     @Override
@@ -156,6 +173,17 @@ public class RotateMenu extends ViewGroup{
         return animSet;
     }
 
+    private AnimatorSet getRotateText(){
+        AnimatorSet animatorSet = new AnimatorSet();
+
+        topMenu.setPivotX(mWidth);
+        topMenu.setPivotY(mHeight);
+        ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(topMenu, "rotation", topMenu.getRotation(), topMenu.getRotation()+20.0F);
+
+        animatorSet.play(pageMiddle);
+        return animatorSet;
+    }
+
     AnimatorSet animSet = new AnimatorSet();
 
     public void rotateMenu(){
@@ -172,10 +200,10 @@ public class RotateMenu extends ViewGroup{
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    if(mPageMiddle.getRotation()%360==0){
-                        for(ViewGroup layout:mPages){
+                    if (mPageMiddle.getRotation() % 360 == 0) {
+                        for (ViewGroup layout : mPages) {
                             layout.setRotation(0);
-                            if (DEBUG) Log.d(TAG,"PAGE RESET");
+                            if (DEBUG) Log.d(TAG, "PAGE RESET");
                         }
                     }
                 }
@@ -191,6 +219,8 @@ public class RotateMenu extends ViewGroup{
                 }
             });
             animSet.start();
+
+            mRotateTextMenu.rotateCursor();
         }
 
     }

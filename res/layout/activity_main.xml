@@ -60,25 +60,6 @@
             android:layout_above="@+id/bt_bottom"
             android:background="#123456"
             >
-            <Button
-                android:layout_width="120dip"
-                android:layout_height="120dip" />
-
-            <Button
-                android:layout_width="120dip"
-                android:layout_height="120dip" />
-
-            <Button
-                android:layout_width="120dip"
-                android:layout_height="120dip" />
-            <Button
-                android:layout_width="120dip"
-                android:layout_height="120dip" />
-
-            <Button
-                android:layout_width="120dip"
-                android:layout_height="120dip" />
-
         </cn.z.widget.RotateGroup>
     </cn.z.widget.RotateMenu>
 
