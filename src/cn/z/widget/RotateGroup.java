@@ -22,8 +22,6 @@ public class RotateGroup extends ViewGroup {
 
     private CenterType mType;
 
-
-
     private int mDiameter;
 
     public enum CenterType {
@@ -64,91 +62,26 @@ public class RotateGroup extends ViewGroup {
             if(i<4){
                 px = (int) ((diameter - mItemWidth)  * Math.cos(18 * (i + 1) * Math.PI / 180)) - mItemWidth /2;
                 py = (int) ((diameter - mItemHeight)  * Math.sin(18 * (i + 1) * Math.PI / 180)) - mItemHeight /2;
-            }
-            else if(i<9){
+            }else if(i<9){
                 px = (int) ((diameter - mItemWidth/2)  * Math.cos(15 * (k + 1) * Math.PI / 180));
                 py = (int) ((diameter - mItemHeight/2)  * Math.sin(15 * (k + 1) * Math.PI / 180));
                 k++;
-            }
-            else{
+            }else{
                 break;
             }
 
             if(DEBUG) Log.d(TAG,""+diameter+"px="+px+"/py="+py);
 
-            //第三象限
-            //child.layout(diameter+px+mItemWidth, py-mItemHeight, diameter+px+mItemWidth * 2, py);
-            //第一象限
-            //child.layout(px-mItemWidth, diameter+py+mItemHeight, px, diameter+py+mItemHeight*2);
-            //第二象限
-            //child.layout(px-mItemWidth, diameter+py-mItemHeight, px, diameter+py);
-
-
-            //child.layout(px, diameter+py, px + mItemWidth, diameter+py+mItemHeight);
-
-            switch (mType){
-                case RIGHT_TOP:
-                    //第三象限
-                    //child.layout(diameter+px+mItemWidth, py-mItemHeight, diameter+px+mItemWidth * 2, py);
-                    child.layout(diameter - px, py- mItemHeight, diameter - px + mItemWidth, py);
-                    break;
-                case LEFT_BOTTOM:
-                    //第一象限
-                    //child.layout(px-mItemWidth, diameter+py+mItemHeight, px, diameter+py+mItemHeight*2);
-                    child.layout(px- mItemWidth, diameter - py, px, diameter - py + mItemHeight);
-                    break;
-                case RIGHT_BOTTOM:
-                    //第二象限
-                    //child.layout(px-mItemWidth, diameter+py-mItemHeight, px, diameter+py);
-                    child.layout(diameter - px , diameter - py, diameter - px + mItemWidth, diameter - py + mItemHeight);
-                    break;
-
-            }
+            child.layout(diameter - px , diameter - py, diameter - px + mItemWidth, diameter - py + mItemHeight);
         }
     }
 
-//    @Override
-//    protected void dispatchDraw(Canvas canvas) {
-//        //canvas.drawColor(Color.YELLOW);
-//
-//        Paint paint = new Paint();
-//        paint.setStrokeWidth(240);
-//        paint.setAntiAlias(true);
-//        paint.setStrokeJoin(Paint.Join.ROUND);
-//        paint.setStrokeCap(Paint.Cap.ROUND);
-//        paint.setStyle(Paint.Style.STROKE);
-//        paint.setColor(Color.parseColor("#50848095"));
-//        canvas.drawCircle(mDiameter, mDiameter, 520, paint);
-//
-//        int count = getChildCount();
-//        for(int i=0;i<count;i++){
-//            View child = getChildAt(i);
-//            drawChild(canvas, child, 0);
-//        }
-////        drawChild(canvas, mPageMiddle, 0);
-////        drawChild(canvas, mPageRight,0);
-////        drawChild(canvas, mPageDown,0);
-////        drawChild(canvas, rotateTextMenu,0);
-//    }
-
     public void setItemAdapter(CenterType type,BaseItemAdapter adapter){
         this.mType = type;
-
-        float rotation = 0;
-        switch (type){
-            case RIGHT_TOP:
-                rotation = -90;
-                break;
-            case LEFT_BOTTOM:
-                rotation = 90;
-                break;
-        }
-
         int count = adapter.getCount();
         View child = null;
         for(int i=0;i<count;i++){
             child = adapter.getItem(i);
-            child.setRotation(rotation);
             addView(child);
         }
     }
@@ -165,7 +98,6 @@ public class RotateGroup extends ViewGroup {
         mDiameter = MeasureSpec.getSize(diameter);
 
         setMeasuredDimension(diameter, diameter);
-
     }
 
 }

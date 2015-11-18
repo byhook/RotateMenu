@@ -1,6 +1,5 @@
 package cn.z.widget;
 
-import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -9,9 +8,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 /**
@@ -29,20 +28,20 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
     private int mWidth;
     private int mHeight;
 
-    private ViewGroup mPageMiddle;
-    private ViewGroup mPageRight;
-    private ViewGroup mPageDown;
-
+    /**
+     * 页面集合
+     */
     private ViewGroup mPages[] = new ViewGroup[3];
 
     /**
-     * 页面下标
+     * 文本菜单项
      */
-    private int pageIndex = 2;
-
     private RotateTextMenu mRotateTextMenu;
 
-    private Button topMenu;
+    /**
+     * 当前页面
+     */
+    private int nowPage = 0;
 
     public RotateMenu(Context context) {
         this(context, null);
@@ -54,19 +53,31 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
 
     public RotateMenu(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        initView();
+    }
+
+    private void initView(){
+        mRotateTextMenu = new RotateTextMenu(getContext());
+        addView(mRotateTextMenu);
+        mRotateTextMenu.setOnItemClickListener(RotateMenu.this);
+        //mRotateTextMenu.setBackgroundColor(Color.parseColor("#50909090"));
     }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-
-        if (DEBUG) Log.e(TAG, "" + changed + "/" + l + "/" + t + "/" + r + "/" + b + "//");
-
-        mPageMiddle.layout(l, mHeight - mWidth, l + mWidth, mHeight);
-        mPageRight.layout(l + mWidth, mHeight - mWidth, l + mWidth * 2, mHeight);
-        mPageDown.layout(l, mHeight, l + mWidth, mHeight + mWidth);
-
-        //mRotateTextMenu.layout(l, mHeight-mWidth, l + mWidth, mHeight);
-        mRotateTextMenu.layout(r - 320, b - 320, r - 320 + mWidth, b - 320 + mWidth);
+        if (DEBUG) Log.e(TAG, "" + changed + "/" + l + "/" + t + "/" + r + "/" + b + "//"+getMeasuredHeight());
+        for(int i=0;i<getChildCount();i++){
+            View child = getChildAt(i);
+            if(child instanceof RotateGroup){
+                //常规页面
+                child.setPivotX(getMeasuredWidth());
+                child.setPivotY(getMeasuredWidth());
+                child.layout(l, mHeight - mWidth, l + mWidth, mHeight);
+            }else{
+                //右下角的文本选项卡
+                child.layout(r - child.getMeasuredWidth(), b - child.getMeasuredHeight(), r , b);
+            }
+        }
     }
 
     @Override
@@ -92,159 +103,112 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
         canvas.drawCircle(mWidth, mHeight, 520, paint);
 
         Paint pt = new Paint();
-
         pt.setColor(getResources().getColor(android.R.color.holo_blue_dark));
-        canvas.drawCircle(mWidth, mHeight, 360, pt);
+        canvas.drawCircle(getMeasuredWidth(), getMeasuredHeight(), 360, pt);
 
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
             drawChild(canvas, child, 0);
         }
-//        drawChild(canvas, mPageMiddle, 0);
-//        drawChild(canvas, mPageRight,0);
-//        drawChild(canvas, mPageDown,0);
-//        drawChild(canvas, mRotateTextMenu,0);
     }
+
+
 
     /**
      * 设置页面适配器
-     *
      * @param adapter
+     * 适配页面数据
      */
-    public boolean setPageAdapter(BasePageAdapter adapter) {
+    public boolean setPageAdapter(final RotatePagerAdapter adapter) {
         if (null == adapter)
             return false;
-//        int count = adapter.getCount();
-//        for(int i=0;i<count;i++){
-//            mPages[i] = adapter.getItem(i);
-//            addView(mPages[i]);
-//        }
-
-
-        mPageMiddle = adapter.getItem(0);
-        addView(mPageMiddle);
-        mPages[0] = mPageMiddle;
-
-        mPageRight = adapter.getItem(1);
-        addView(mPageRight);
-        mPages[1] = mPageRight;
-
-        mPageDown = adapter.getItem(2);
-        addView(mPageDown);
-        mPages[2] = mPageDown;
-
-
-        String[] titles = {"常用", "打开", "工具"};
-        mRotateTextMenu = new RotateTextMenu(getContext());
-        mRotateTextMenu.setTextAdapter(titles);
-        addView(mRotateTextMenu);
-        mRotateTextMenu.setOnItemClickListener(this);
+        int count = adapter.getCount();
+        for(int i=0;i<count;i++){
+            mPages[i] = adapter.getPage(i);
+            addView(mPages[i]);
+        }
+        //偏向右边
+        mPages[1] .setRotation(90);
+        //偏向左边
+        mPages[2] .setRotation(-90);
         return true;
     }
 
     /**
-     * 初始化页面的位置
+     * 设置文本适配
+     * @param adapter
      */
-    private void initPagePosition() {
-        mPageMiddle.setPivotX(720);
-        mPageMiddle.setPivotY(720);
-        mPageRight.setPivotX(0);
-        mPageRight.setPivotY(720);
-        mPageDown.setPivotX(720);
-        mPageDown.setPivotY(0);
-
-        System.out.println("Pivot=" + mPageMiddle.getPivotX() + "/" + mPageMiddle.getPivotY());
+    public void setTextAdapter(RotateTextAdapter adapter){
+        mRotateTextMenu.setTextAdapter(adapter);
     }
+
+
+    /**
+     * 旋转菜单
+     * @param direction 方向true 逆时针 false 顺时针
+     * @param next 待显示页面
+     */
+    AnimatorSet animSet = null;
+    public void nextMenu(boolean direction, int next){
+        if(null==animSet || !animSet.isStarted()){
+            final float temp = direction?-90.0F:90.0F;
+            ObjectAnimator pageRight = ObjectAnimator.ofFloat(mPages[nowPage], "rotation", 0.0F, temp);
+            ObjectAnimator pageNext = ObjectAnimator.ofFloat(mPages[next], "rotation", -temp, 0.0F);
+
+            animSet = new AnimatorSet();
+            animSet.playTogether(pageRight, pageNext);
+            animSet.start();
+
+            mRotateTextMenu.rotateCursor(next);
+            nowPage = next;
+        }
+    }
+
+    /**
+     * 下一个菜单
+     * 默认逆时针旋转
+     */
+    public void nextMenu() {
+        nextMenu(true, (nowPage + 1) % 3);
+    }
+
+    public void prevMenu(){
+        nextMenu(false, (nowPage + 1) % 3);
+    }
+
+    private float mPointX = 0;
+    private boolean rotated;
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        //initMenu();
-    }
-
-    private void initMenu() {
-        AnimatorSet animSet = new AnimatorSet();
-        ObjectAnimator pageRight = ObjectAnimator.ofFloat(mPageRight, "rotation", 0.0F, 90F);
-        ObjectAnimator pageDown = ObjectAnimator.ofFloat(mPageDown, "rotation", 0.0F, -90F);
-
-        animSet.playTogether(pageRight, pageDown);
-        animSet.start();
-    }
-
-    /**
-     * 转轮旋转
-     *
-     * @param index
-     * @return
-     */
-    public AnimatorSet getRotateMenu(int index) {
-        for (int i = 0; i < mPages.length; i++) {
-            ViewGroup page = mPages[i];
-            //90度或者180度
-            final float temp = i == (index % 3) ? 180.0F : 90.F;
-            ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(page, "rotation", page.getRotation(), page.getRotation() - temp);
-            animSet.play(pageMiddle);
-        }
-        return animSet;
-    }
-
-    /**
-     * 设置当前页面
-     * @param index
-     */
-    public AnimatorSet setCurrentPage(int index) {
-        for (int i = 0; i < mPages.length; i++) {
-            ViewGroup page = mPages[i];
-            //90度或者180度
-            final float temp = i == (index % 3) ? 180.0F : 90.F;
-            ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(page, "rotation", page.getRotation(), page.getRotation() - temp);
-            animSet.play(pageMiddle);
-        }
-        return animSet;
-    }
-
-    AnimatorSet animSet = new AnimatorSet();
-    private int index = 0;
-    public void rotateMenu() {
-        initPagePosition();
-        if (!animSet.isStarted()) {
-            animSet = getRotateMenu(pageIndex++);
-
-            animSet.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    if (mPageMiddle.getRotation() % 360 == 0) {
-                        for (ViewGroup layout : mPages) {
-                            layout.setRotation(0);
-                            if (DEBUG) Log.d(TAG, "PAGE RESET");
-                        }
+    public boolean onTouchEvent(MotionEvent ev) {
+        System.out.println("MOVE...onTouchEvent");
+        switch (ev.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                mPointX = ev.getX();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if(!rotated){
+                    if(ev.getX()-mPointX<-10){
+                         rotated = true;
+                         nextMenu();
+                    }else if(ev.getX()-mPointX>10){
+                         rotated = true;
+                         prevMenu();
                     }
+                    return true;
                 }
-
-                @Override
-                public void onAnimationCancel(Animator animation) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animation) {
-
-                }
-            });
-            animSet.start();
-            mRotateTextMenu.rotateCursor(++index);
+                break;
+            case MotionEvent.ACTION_UP:
+                rotated = false;
+                break;
         }
+        return true;//super.onTouchEvent(ev);
     }
 
     @Override
     public void onItemClick(View view, int index) {
-        mRotateTextMenu.rotateCursor(index);
+        nextMenu(index>nowPage, (index) % 3);
         Toast.makeText(getContext(), "Index=" + index, Toast.LENGTH_SHORT).show();
     }
 }

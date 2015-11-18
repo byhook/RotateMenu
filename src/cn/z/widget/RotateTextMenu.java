@@ -16,11 +16,11 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 /**
- * Created by byhook on 15-11-16.
- * Mail : byhook@163.com
+ * 作者 : byhook
+ * 时间 : 15-11-16.
+ * 邮箱 : byhook@163.com
  * 自定义选项卡文本内容
  * 带转盘滚动效果
  */
@@ -32,7 +32,7 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
     /**
      * 游标
      */
-    private Button mCursor;
+    private View mCursor;
 
 
     /**
@@ -42,7 +42,7 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
     private int mHeight;
 
 
-    private Button[] mTitles;
+    private View[] mTitles;
 
 
     private OnItemClickImpl mOnItemClickImpl;
@@ -81,34 +81,34 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
 
         for(int i=0;i<count;i++){
             View child = getChildAt(i);
-            child.layout(0, (b-t)/2-child.getMeasuredHeight()/2, 0 + child.getMeasuredWidth(), (b-t)/2 + child.getMeasuredHeight()/2);
+            //child.layout(0,0,r,b);
+            child.layout(0, (b-t)-child.getMeasuredHeight()/2, child.getMeasuredWidth(),  (b-t)+child.getMeasuredHeight()/2);
+            //child.layout(0, (b-t)/2-child.getMeasuredHeight()/2, 0 + child.getMeasuredWidth(), (b-t)/2 + child.getMeasuredHeight()/2);
         }
     }
 
     /**
      * 设置文本适配器
-     * @param titles
+     * @param adapter
      */
-    public void setTextAdapter(String[] titles){
-        if(titles==null)
+    float temp = 0;
+    public void setTextAdapter(final RotateTextAdapter adapter){  //String[] titles  //RotateTextAdapter adapter
+        if(null==adapter)
             return ;
 
-        mTitles = new Button[titles.length];
+        final int count = adapter.getCount();
+
+        mTitles = new View[adapter.getCount()];
         for(int i=0;i<mTitles.length;i++){
-            mTitles[i] = new Button(getContext());
-            mTitles[i].setText(titles[i]);
-            mTitles[i].setGravity(Gravity.CENTER);
-            mTitles[i].setBackgroundColor(Color.YELLOW);
+            mTitles[i] = adapter.getView(i);
             mTitles[i].setOnClickListener(this);
             mTitles[i].setTag(i);
             addView(mTitles[i]);
         }
 
-        //游标
-        mCursor = new Button(getContext());
+        mCursor = adapter.getCursor();
         mCursor.setBackgroundColor(Color.parseColor("#B0FFFFFF"));
         addView(mCursor);
-
 
         this.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
@@ -116,13 +116,14 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
             public void onGlobalLayout() {
                 getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                final float temp = (float) 90 / (mTitles.length + 1);
-                int index = 0;
-                for (TextView title : mTitles) {
-                    title.setPivotX(mWidth / 2);
-                    title.setPivotY(title.getMeasuredHeight() / 2);  //
-                    title.setRotation(temp * (1 + index++));
+                temp = (float) 90 / (count+1);
+
+                for(int i=0;i<count;i++){
+                    mTitles[i].setPivotX(mWidth / 2);
+                    mTitles[i].setPivotY(mCursor.getMeasuredHeight()/2);
+                    mTitles[i].setRotation(temp * (1 + i));
                 }
+
                 mCursor.setPivotX(mWidth / 2);
                 mCursor.setPivotY(mCursor.getMeasuredHeight() / 2);
                 mCursor.setRotation(temp);
@@ -133,15 +134,23 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
-        this.mWidth = MeasureSpec.getSize(widthMeasureSpec);
-        this.mHeight = MeasureSpec.getSize(heightMeasureSpec);
+        //this.mWidth = MeasureSpec.getSize(widthMeasureSpec);
+//        this.mHeight = MeasureSpec.getSize(heightMeasureSpec);
 
         //测量子控件
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         int diameter = Math.min(widthMeasureSpec, heightMeasureSpec);
+
+        int width = diameter;
+        if(getChildCount()>0){
+            View child = getChildAt(0);
+            width = (int) (child.getMeasuredWidth()*2.5F);
+        }
         //测量父容器
-        setMeasuredDimension(diameter, diameter);
+        this.mWidth = width*2;
+        this.mHeight = width*2;
+        setMeasuredDimension(width, width);
     }
 
     /**
@@ -195,14 +204,14 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
 
 //    @Override
 //    protected void dispatchDraw(Canvas canvas) {
-//        Paint paint = new Paint();
-//        paint.setAntiAlias(true);
-//        paint.setStrokeJoin(Paint.Join.ROUND);
-//        paint.setStrokeCap(Paint.Cap.ROUND);
-//        paint.setStyle(Paint.Style.FILL);
-//        paint.setColor(Color.parseColor("#A0123456"));
-//        canvas.drawCircle(360, 360, 320, paint);
+//        Paint pt = new Paint();
+//        pt.setColor(getResources().getColor(android.R.color.holo_blue_dark));
+//        canvas.drawCircle(getMeasuredWidth(), getMeasuredHeight(), 360, pt);
 //
-//        drawChild(canvas, button, 0);
+//        int count = getChildCount();
+//        for (int i = 0; i < count; i++) {
+//            View child = getChildAt(i);
+//            drawChild(canvas, child, 0);
+//        }
 //    }
 }

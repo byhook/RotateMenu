@@ -58,7 +58,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/bt_bottom"
-            android:background="#123456"
             >
         </cn.z.widget.RotateGroup>
     </cn.z.widget.RotateMenu>

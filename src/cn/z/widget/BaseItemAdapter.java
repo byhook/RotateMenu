@@ -18,6 +18,7 @@ import sample.byhook.rotatemenu.R;
 /**
  * Created by byhook on 15-11-16.
  * Mail : byhook@163.com
+ * 基本的Item适配对象
  */
 public class BaseItemAdapter {
 

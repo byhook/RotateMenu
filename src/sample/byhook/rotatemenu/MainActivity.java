@@ -1,20 +1,9 @@
 package sample.byhook.rotatemenu;
 
-import android.animation.ObjectAnimator;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.view.PagerAdapter;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +12,8 @@ import cn.z.widget.BaseItemAdapter;
 import cn.z.widget.RotateGroup;
 import cn.z.widget.RotateItemBean;
 import cn.z.widget.RotateMenu;
+import cn.z.widget.RotatePagerAdapter;
+import cn.z.widget.RotateTextAdapter;
 
 public class MainActivity extends Activity {
 
@@ -62,16 +53,19 @@ public class MainActivity extends Activity {
 		BaseItemAdapter rightItemAdapter = new BaseItemAdapter(this,infos.subList(9,18));
 		BaseItemAdapter downItemAdapter = new BaseItemAdapter(this,infos.subList(18,27));
 
-		mPages[0].setItemAdapter(RotateGroup.CenterType.RIGHT_BOTTOM,middleItemAdapter);
-		mPages[1].setItemAdapter(RotateGroup.CenterType.LEFT_BOTTOM,rightItemAdapter);
-		mPages[2].setItemAdapter(RotateGroup.CenterType.RIGHT_TOP,downItemAdapter);
+		mPages[0].setItemAdapter(RotateGroup.CenterType.RIGHT_BOTTOM, middleItemAdapter);
+		mPages[1].setItemAdapter(RotateGroup.CenterType.LEFT_BOTTOM, rightItemAdapter);
+		mPages[2].setItemAdapter(RotateGroup.CenterType.RIGHT_TOP, downItemAdapter);
 
-		PageAdapter adapter = new PageAdapter(mPages);
+		RotatePagerAdapter adapter = new RotatePagerAdapter(mPages);
 		rotateMenu.setPageAdapter(adapter);
+		String[] titles = new String[]{"快捷","经常","最近"};
+		RotateTextAdapter rotateTextAdapter = new RotateTextAdapter(this,titles);
+		rotateMenu.setTextAdapter(rotateTextAdapter);
 	}
 
 	public void onClick(View view){
-		rotateMenu.rotateMenu();
+		rotateMenu.nextMenu();
 	}
 
 }
