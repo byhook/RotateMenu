@@ -45,7 +45,7 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
     private Button topMenu;
 
     public RotateMenu(Context context) {
-        this(context,null);
+        this(context, null);
     }
 
     public RotateMenu(Context context, AttributeSet attrs) {
@@ -59,14 +59,14 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
-        if(DEBUG) Log.e(TAG, "" + changed + "/" + l + "/" + t + "/" + r + "/" + b + "//");
+        if (DEBUG) Log.e(TAG, "" + changed + "/" + l + "/" + t + "/" + r + "/" + b + "//");
 
-        mPageMiddle.layout(l, mHeight-mWidth, l + mWidth, mHeight);
-        mPageRight.layout(l + mWidth, mHeight-mWidth, l + mWidth*2, mHeight);
-        mPageDown.layout(l, mHeight, l + mWidth, mHeight+mWidth);
+        mPageMiddle.layout(l, mHeight - mWidth, l + mWidth, mHeight);
+        mPageRight.layout(l + mWidth, mHeight - mWidth, l + mWidth * 2, mHeight);
+        mPageDown.layout(l, mHeight, l + mWidth, mHeight + mWidth);
 
         //mRotateTextMenu.layout(l, mHeight-mWidth, l + mWidth, mHeight);
-        mRotateTextMenu.layout(r-320, b-320, r-320 + mWidth, b-320 + mWidth);
+        mRotateTextMenu.layout(r - 320, b - 320, r - 320 + mWidth, b - 320 + mWidth);
     }
 
     @Override
@@ -97,7 +97,7 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
         canvas.drawCircle(mWidth, mHeight, 360, pt);
 
         int count = getChildCount();
-        for(int i=0;i<count;i++){
+        for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
             drawChild(canvas, child, 0);
         }
@@ -109,10 +109,11 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
 
     /**
      * 设置页面适配器
+     *
      * @param adapter
      */
-    public boolean setPageAdapter(BasePageAdapter adapter){
-        if(null==adapter)
+    public boolean setPageAdapter(BasePageAdapter adapter) {
+        if (null == adapter)
             return false;
 //        int count = adapter.getCount();
 //        for(int i=0;i<count;i++){
@@ -121,20 +122,20 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
 //        }
 
 
-      mPageMiddle = adapter.getItem(0);
-      addView(mPageMiddle);
-      mPages[0] = mPageMiddle;
+        mPageMiddle = adapter.getItem(0);
+        addView(mPageMiddle);
+        mPages[0] = mPageMiddle;
 
-      mPageRight = adapter.getItem(1);
-      addView(mPageRight);
-      mPages[1] = mPageRight;
+        mPageRight = adapter.getItem(1);
+        addView(mPageRight);
+        mPages[1] = mPageRight;
 
-      mPageDown = adapter.getItem(2);
-      addView(mPageDown);
-      mPages[2] = mPageDown;
+        mPageDown = adapter.getItem(2);
+        addView(mPageDown);
+        mPages[2] = mPageDown;
 
 
-        String[] titles = {"常用","打开","工具"};
+        String[] titles = {"常用", "打开", "工具"};
         mRotateTextMenu = new RotateTextMenu(getContext());
         mRotateTextMenu.setTextAdapter(titles);
         addView(mRotateTextMenu);
@@ -145,7 +146,7 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
     /**
      * 初始化页面的位置
      */
-    private void initPagePosition(){
+    private void initPagePosition() {
         mPageMiddle.setPivotX(720);
         mPageMiddle.setPivotY(720);
         mPageRight.setPivotX(0);
@@ -162,7 +163,7 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
         //initMenu();
     }
 
-    private void initMenu(){
+    private void initMenu() {
         AnimatorSet animSet = new AnimatorSet();
         ObjectAnimator pageRight = ObjectAnimator.ofFloat(mPageRight, "rotation", 0.0F, 90F);
         ObjectAnimator pageDown = ObjectAnimator.ofFloat(mPageDown, "rotation", 0.0F, -90F);
@@ -171,18 +172,18 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
         animSet.start();
     }
 
-
     /**
      * 转轮旋转
+     *
      * @param index
      * @return
      */
-    public AnimatorSet getRotateMenu(int index){
-        for(int i=0;i<mPages.length;i++){
+    public AnimatorSet getRotateMenu(int index) {
+        for (int i = 0; i < mPages.length; i++) {
             ViewGroup page = mPages[i];
             //90度或者180度
-            final float temp = i==(index%3)?180.0F:90.F;
-            ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(page, "rotation", page.getRotation(), page.getRotation()-temp);
+            final float temp = i == (index % 3) ? 180.0F : 90.F;
+            ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(page, "rotation", page.getRotation(), page.getRotation() - temp);
             animSet.play(pageMiddle);
         }
         return animSet;
@@ -192,16 +193,22 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
      * 设置当前页面
      * @param index
      */
-    public void setCurrentPage(int index){
-
+    public AnimatorSet setCurrentPage(int index) {
+        for (int i = 0; i < mPages.length; i++) {
+            ViewGroup page = mPages[i];
+            //90度或者180度
+            final float temp = i == (index % 3) ? 180.0F : 90.F;
+            ObjectAnimator pageMiddle = ObjectAnimator.ofFloat(page, "rotation", page.getRotation(), page.getRotation() - temp);
+            animSet.play(pageMiddle);
+        }
+        return animSet;
     }
 
     AnimatorSet animSet = new AnimatorSet();
-    private int index = 2;
-    public void rotateMenu(){
+    private int index = 0;
+    public void rotateMenu() {
         initPagePosition();
-
-        if(!animSet.isStarted()){
+        if (!animSet.isStarted()) {
             animSet = getRotateMenu(pageIndex++);
 
             animSet.addListener(new Animator.AnimatorListener() {
@@ -231,12 +238,13 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
                 }
             });
             animSet.start();
-            mRotateTextMenu.rotateCursor(index++);
+            mRotateTextMenu.rotateCursor(++index);
         }
     }
 
     @Override
     public void onItemClick(View view, int index) {
-        Toast.makeText(getContext(), "Index="+index, Toast.LENGTH_SHORT).show();
+        mRotateTextMenu.rotateCursor(index);
+        Toast.makeText(getContext(), "Index=" + index, Toast.LENGTH_SHORT).show();
     }
 }
