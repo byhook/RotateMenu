@@ -17,6 +17,8 @@ import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.TextView;
 
+import sample.byhook.rotatemenu.R;
+
 /**
  * 作者 : byhook
  * 时间 : 15-11-16.
@@ -79,11 +81,31 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
 
         int count = getChildCount();
 
+        int top = b-t;
+        int left = r-l;
+
         for(int i=0;i<count;i++){
             View child = getChildAt(i);
-            //child.layout(0,0,r,b);
-            child.layout(0, (b-t)-child.getMeasuredHeight()/2, child.getMeasuredWidth(),  (b-t)+child.getMeasuredHeight()/2);
-            //child.layout(0, (b-t)/2-child.getMeasuredHeight()/2, 0 + child.getMeasuredWidth(), (b-t)/2 + child.getMeasuredHeight()/2);
+            final int childWidth = child.getMeasuredWidth();
+            final int childHeight = child.getMeasuredHeight();
+
+            child.setPivotX(mWidth);
+            child.setPivotY(child.getMeasuredHeight() / 2);
+
+            if(child.getTag()!=null){
+                //普通选项
+                //设置旋转方向
+                child.setRotation(temp * (i + 1));
+            }else{
+                //移动游标
+                child.setMinimumWidth(mTitles[0].getMeasuredWidth());
+                child.setMinimumHeight(mTitles[0].getMeasuredHeight());
+                child.setRotation(temp);
+            }
+
+            System.out.println("#Z===" + child.getTag());
+            child.layout(0, top-childHeight/2, childWidth,top+childHeight/2);
+
         }
     }
 
@@ -92,11 +114,12 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
      * @param adapter
      */
     float temp = 0;
+    int itemCount = 0;
     public void setTextAdapter(final RotateTextAdapter adapter){  //String[] titles  //RotateTextAdapter adapter
         if(null==adapter)
             return ;
 
-        final int count = adapter.getCount();
+        itemCount = adapter.getCount();
 
         mTitles = new View[adapter.getCount()];
         for(int i=0;i<mTitles.length;i++){
@@ -106,51 +129,26 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
             addView(mTitles[i]);
         }
 
+        temp = (float) 90 / (itemCount+1);
+
         mCursor = adapter.getCursor();
-        mCursor.setBackgroundColor(Color.parseColor("#B0FFFFFF"));
+        mCursor.setBackgroundResource(R.drawable.text_cursor_shape);
         addView(mCursor);
 
-        this.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public void onGlobalLayout() {
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                temp = (float) 90 / (count+1);
-
-                for(int i=0;i<count;i++){
-                    mTitles[i].setPivotX(mWidth / 2);
-                    mTitles[i].setPivotY(mCursor.getMeasuredHeight()/2);
-                    mTitles[i].setRotation(temp * (1 + i));
-                }
-
-                mCursor.setPivotX(mWidth / 2);
-                mCursor.setPivotY(mCursor.getMeasuredHeight() / 2);
-                mCursor.setRotation(temp);
-            }
-        });
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
-        //this.mWidth = MeasureSpec.getSize(widthMeasureSpec);
-//        this.mHeight = MeasureSpec.getSize(heightMeasureSpec);
 
         //测量子控件
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         int diameter = Math.min(widthMeasureSpec, heightMeasureSpec);
 
-        int width = diameter;
-        if(getChildCount()>0){
-            View child = getChildAt(0);
-            width = (int) (child.getMeasuredWidth()*2.5F);
-        }
         //测量父容器
-        this.mWidth = width*2;
-        this.mHeight = width*2;
-        setMeasuredDimension(width, width);
+        this.mWidth = DimenUtils.getDis(getContext()).widthPixels/12*5;
+        this.mHeight = mWidth;
+        setMeasuredDimension(mWidth, mWidth);
     }
 
     /**
@@ -169,7 +167,7 @@ public class RotateTextMenu extends ViewGroup implements View.OnClickListener {
     /**
      * 旋转游标
      */
-    public void rotateCursor(int index){
+    public void rotateCursor(boolean direction,int index){
         final float rotation = mTitles[(index)%3].getRotation();
         final float result = -(mCursor.getRotation()-rotation)%360;
         AnimatorSet anim = getRotate(mCursor, result);

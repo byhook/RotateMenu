@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
 
 		RotatePagerAdapter adapter = new RotatePagerAdapter(mPages);
 		rotateMenu.setPageAdapter(adapter);
-		String[] titles = new String[]{"快捷","经常","最近"};
+		String[] titles = new String[]{"快捷方式","经常使用","最近打开"};
 		RotateTextAdapter rotateTextAdapter = new RotateTextAdapter(this,titles);
 		rotateMenu.setTextAdapter(rotateTextAdapter);
 	}

@@ -52,7 +52,7 @@ public class RotateTextAdapter {
      * @return
      */
     public View getCursor(){
-
-        return new Button(ctx);
+        TextView bt = (TextView) inflater.inflate(R.layout.rotate_text_item,null);
+        return bt;
     }
 }

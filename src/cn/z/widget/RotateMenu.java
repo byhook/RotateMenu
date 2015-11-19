@@ -20,7 +20,7 @@ import android.widget.Toast;
  * 包含旋转ITEM
  * 子菜单选项
  */
-public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickImpl {
+public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickImpl, View.OnClickListener {
 
     private static final boolean DEBUG = true;
     private static final String TAG = "RotateMenu";
@@ -60,7 +60,9 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
         mRotateTextMenu = new RotateTextMenu(getContext());
         addView(mRotateTextMenu);
         mRotateTextMenu.setOnItemClickListener(RotateMenu.this);
-        //mRotateTextMenu.setBackgroundColor(Color.parseColor("#50909090"));
+//        mRotateTextMenu.setBackgroundColor(Color.parseColor("#50909090"));
+
+        this.setOnClickListener(this);
     }
 
     @Override
@@ -94,17 +96,16 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
     @Override
     protected void dispatchDraw(Canvas canvas) {
         Paint paint = new Paint();
-        paint.setStrokeWidth(360);
         paint.setAntiAlias(true);
-        paint.setStrokeJoin(Paint.Join.ROUND);
-        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeWidth(DimenUtils.getDis(getContext()).widthPixels/2F);
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.parseColor("#50848095"));
-        canvas.drawCircle(mWidth, mHeight, 520, paint);
+        canvas.drawCircle(mWidth, mHeight, DimenUtils.getDis(getContext()).widthPixels/3*2, paint);
 
         Paint pt = new Paint();
+        pt.setAntiAlias(true);
         pt.setColor(getResources().getColor(android.R.color.holo_blue_dark));
-        canvas.drawCircle(getMeasuredWidth(), getMeasuredHeight(), 360, pt);
+        canvas.drawCircle(mWidth, mHeight, DimenUtils.getDis(getContext()).widthPixels / 12 * 5+5, pt);
 
         int count = getChildCount();
         for (int i = 0; i < count; i++) {
@@ -112,8 +113,6 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
             drawChild(canvas, child, 0);
         }
     }
-
-
 
     /**
      * 设置页面适配器
@@ -160,7 +159,7 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
             animSet.playTogether(pageRight, pageNext);
             animSet.start();
 
-            mRotateTextMenu.rotateCursor(next);
+            mRotateTextMenu.rotateCursor(true,next);
             nowPage = next;
         }
     }
@@ -181,21 +180,14 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
     private boolean rotated;
 
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        System.out.println("MOVE...onTouchEvent");
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
         switch (ev.getAction()){
             case MotionEvent.ACTION_DOWN:
                 mPointX = ev.getX();
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(!rotated){
-                    if(ev.getX()-mPointX<-10){
-                         rotated = true;
-                         nextMenu();
-                    }else if(ev.getX()-mPointX>10){
-                         rotated = true;
-                         prevMenu();
-                    }
+                if(Math.abs(ev.getX()-mPointX) > 5){
+
                     return true;
                 }
                 break;
@@ -203,12 +195,52 @@ public class RotateMenu extends ViewGroup implements RotateTextMenu.OnItemClickI
                 rotated = false;
                 break;
         }
-        return true;//super.onTouchEvent(ev);
+        return super.onInterceptTouchEvent(ev);
+    }
+
+    private float mPointY;
+    @Override
+    public boolean onTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                mPointX = ev.getX();
+                mPointY = ev.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if(!rotated){
+                    final float distanceX = ev.getX()-mPointX;
+                    final float distanceY = ev.getY()-mPointY;
+
+//                    if(distanceX == 0 && distanceY == 0){
+//                        rotated = true;
+//                        return true;
+//                    } else
+
+                    if (distanceX < -5 || distanceY > 5) {
+                        rotated = true;
+                        nextMenu();
+                        return true;
+                    } else if (distanceX > 5 || distanceY < -5) {
+                        rotated = true;
+                        prevMenu();
+                        return true;
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                rotated = false;
+                break;
+        }
+        return super.onTouchEvent(ev);
     }
 
     @Override
     public void onItemClick(View view, int index) {
-        nextMenu(index>nowPage, (index) % 3);
-        Toast.makeText(getContext(), "Index=" + index, Toast.LENGTH_SHORT).show();
+        nextMenu(index > nowPage, (index) % 3);
+    }
+
+    @Override
+    public void onClick(View v) {
+        //Toast.makeText(getContext(),"Toast.show",Toast.LENGTH_SHORT).show();
     }
 }

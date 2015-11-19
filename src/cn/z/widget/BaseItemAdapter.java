@@ -7,9 +7,14 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -41,14 +46,22 @@ public class BaseItemAdapter {
         return items.size();
     }
 
-    public View getItem(int index) {
+    public View getItem(final int index) {
 
         TextView child = (TextView) inflater.inflate(R.layout.rotate_item,null);
-
-        Drawable drawable = items.get(index).loadIcon(pm);
-        drawable.setBounds(0,0,81,81);
-        child.setCompoundDrawables(null, drawable, null, null);
         child.setText(items.get(index).loadLabel(pm));
+
+        final Drawable drawable = items.get(index).loadIcon(pm);
+        drawable.setBounds(0, 0, DimenUtils.getDis(ctx).widthPixels / 9, DimenUtils.getDis(ctx).widthPixels / 9);
+        child.setCompoundDrawables(null, drawable, null, null);
+
+        child.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(ctx, "INDEX=" + drawable.getMinimumHeight() + "/" + drawable.getMinimumWidth(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
         return child;
     }
 

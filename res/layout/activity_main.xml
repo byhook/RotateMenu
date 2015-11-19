@@ -52,23 +52,8 @@
         android:layout_height="wrap_content"
         android:background="#50998877"
         android:text="@string/hello_world"
-        android:layout_above="@+id/bt_bottom"
         >
-        <cn.z.widget.RotateGroup
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_above="@+id/bt_bottom"
-            >
-        </cn.z.widget.RotateGroup>
+
     </cn.z.widget.RotateMenu>
-
-
-    <Button
-        android:id="@+id/bt_bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:onClick="onClick"
-        />
 
 </RelativeLayout>
