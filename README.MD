@@ -1,1 +1,1 @@
-![image](https://github.com/byhook/RotateMenuSample/img/main.gif)
+![image](https://github.com/byhook/RotateMenuSample/blob/master/img/main.gif)
