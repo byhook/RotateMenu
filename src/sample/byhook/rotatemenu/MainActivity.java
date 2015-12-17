@@ -38,11 +38,9 @@ public class MainActivity extends Activity {
 	}
 
 	private void initData(){
-		List<RotateItemBean> items = new ArrayList<RotateItemBean>();
 
 		List<ApplicationInfo> infos = getPackageManager().getInstalledApplications(0);
-		RotateItemBean bean = null;
-		ApplicationInfo info;
+
 
 		int pages = infos.size()/9;
 		if(pages<3)
